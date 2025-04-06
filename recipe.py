@@ -33,20 +33,29 @@ for category in json_data['result']['medium']:
     parent_dict[str(category['categoryId'])] = category['parentCategoryId']
 
 # 小カテゴリ
+# 小カテゴリ
 for category in json_data['result']['small']:
-    parent1 = parent_dict[category['parentCategoryId']]
-    parent2 = category['parentCategoryId']
-    child = category['categoryId']
-    data.append({
-        'category1': parent1,
-        'category2': parent2,
-        'category3': child,
-        'categoryId': f"{parent1}-{parent2}-{child}",
-        'categoryName': category['categoryName']
-    })
+    parent2 = str(category['parentCategoryId'])  # 中カテゴリID
+    parent1 = parent_dict.get(parent2)  # 大カテゴリID
+
+    if parent1:  # 念のためチェック
+        child = str(category['categoryId'])
+        data.append({
+            'category1': parent1,
+            'category2': parent2,
+            'category3': child,
+            'categoryId': f"{parent1}-{parent2}-{child}",
+            'categoryName': category['categoryName']
+        })
+    else:
+        print(f"⚠ 中カテゴリID {parent2} に対応する大カテゴリが見つかりません")
+
 
 # 最後にDataFrameに変換
 df = pd.DataFrame(data)
 
 # 確認（必要に応じて）
-print(df.head())
+pd.set_option('display.max_rows', None)
+print(df)
+df.to_csv('rakuten_categories.csv', index=False, encoding='utf-8-sig')
+print("CSVに保存しました！")
